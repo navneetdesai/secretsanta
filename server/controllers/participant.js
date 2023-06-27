@@ -46,7 +46,19 @@ const participantController = {
         res.status(500).json({ error: "Failed to delete participant" });
     }
     },
-    
+
+    deleteAllParticipants: async (req, res) => {
+
+        try {
+            const deletedParticipants = await Participant.deleteMany();
+            res.json({ message: 'Participants deleted successfully.' });
+        }
+        catch (error) {
+            res.status(500).json({ error: "Failed to delete participants" });
+        }
+    },
+
+
 
   getParticipantById: async (req, res) => {
     try {
@@ -66,7 +78,6 @@ const participantController = {
     try {
       const participants = await Participant.find();
       const assignments = assignSecretSantas(participants);
-      //   console.log(assignments);
 
       for (const assignment of assignments) {
         const { participantId, secretSantaId } = assignment;
@@ -92,6 +103,25 @@ const participantController = {
         });
     }
   },
+
+  getSecretSantas: async (req, res) => {
+    try {
+      const participants = await Participant.find();
+      const participantsWithSecretSantas = await Promise.all(participants.map(async participant => {
+        const assignedRecipient = await Participant.findById(participant.assignedRecipient);
+        return {
+          _id: participant._id,
+          name: participant.name,
+          email: participant.email,
+          assignedRecipient: assignedRecipient ? assignedRecipient.name : null
+        };
+      }));
+      res.status(200).json(participantsWithSecretSantas);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Failed to retrieve Secret Santas" });
+    }
+  }
 };
 
 module.exports = participantController;
