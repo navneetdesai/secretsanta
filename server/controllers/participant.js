@@ -29,6 +29,25 @@ const participantController = {
     }
   },
 
+  deleteParticipant: async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedParticipant = await Participant.findOneAndDelete({
+            _id: id,
+          });
+      
+          if (!deletedParticipant) {
+            return res.status(404).json({ error: 'Participant not found.' });
+          }
+      
+          res.json({ message: 'Participant deleted successfully.' });
+    }
+    catch (error) {
+        res.status(500).json({ error: "Failed to delete participant" });
+    }
+    },
+    
+
   getParticipantById: async (req, res) => {
     try {
       const { id } = req.params;
